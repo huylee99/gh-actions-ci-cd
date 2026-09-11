@@ -1,0 +1,59 @@
+name: pull request ci
+
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test application
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up NodeJS
+        uses: actions/setup-node@v7
+        with:
+          version: 24
+      
+      - name: Install packages
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit Tests
+        run: npm run test
+
+      - name: Build and Tests Compiled Code
+        run: npm run test:built
+
+  build-docker:
+    name: Validate Docker Image
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          tags: backend:ci-${{ github.sha }}
+
+      
+  
+        
