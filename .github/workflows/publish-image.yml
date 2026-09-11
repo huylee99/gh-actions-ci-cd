@@ -32,7 +32,6 @@ jobs:
         run: npm run build
 
   docker-build:
-    id: image
     name: Build and Publish Artifact
     needs: test
     runs-on: ubuntu-latest
@@ -51,6 +50,7 @@ jobs:
         uses: docker/setup-buildx-action@v4
 
       - name: Build and Push Image
+        id: image
         uses: docker/build-push-action@v7
         with:
           context: .
