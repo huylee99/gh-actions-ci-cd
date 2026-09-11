@@ -32,6 +32,7 @@ jobs:
         run: npm run build
 
   docker-build:
+    id: image
     name: Build and Publish Artifact
     needs: test
     runs-on: ubuntu-latest
